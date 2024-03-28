@@ -58,10 +58,9 @@ function submitContactRequest() {
 }
 
 
-
+//  TODO load from JSON file via fetch()!!!
 staticJson =
-`
-{
+`{
     "countries": [
       {
         "id": 1,
@@ -141,92 +140,158 @@ staticJson =
       }
     ]
   }`;
-  
 const json = JSON.parse(staticJson);
-console.log(json);
+//console.log(json);
   
-plurals = {
-    "beach": "beaches",
-    "country": "countries",
-    "city": "cities",
-    "temple": "temples",
-};
+//  TODO load from JSON file via fetch()!!!
+synonyms =
+[   //  An array of "synonym clusters"
+    ["beach", "beaches"],
+    ["country", "countries"],
+    ["city", "cities"],
+    ["temple", "temples"]
+];
 
-function isLocationJsonNode(node) {
-    return ("name" in node) &&
-           ("imageUrl" in node) &&
-           ("description" in node);
+//  Breaks phrases into lists of words, suppressing punctuation
+function wordize(phrase) {
+    return phrase.replaceAll('.', ' ')
+                 .replaceAll(',', ' ')
+                 .replaceAll('?', ' ')
+                 .replaceAll('!', ' ')  //  TODO what else?
+                 .split(' ')
+                 .filter((item,index) => item.length > 0);
 }
 
+//  Returns a copy of the argument array but without duplicates
+function removeDuplicates(arr) {
+    return arr.filter((item, index) => arr.indexOf(item) === index);
+}
+
+function isLocationJsonNode(node) {
+    return ("name" in node) && typeof(node["name"] == "string") &&
+           ("imageUrl" in node) && typeof(node["imageUrl"] == "string") &&
+           ("description" in node && typeof(node["name"] == "description"));
+}
+
+function enrichWithSynonyms(wordList) {
+    let result = [].concat(wordList);
+    for (const word of wordList) {
+        //console.log("WORD = " + word);
+        for (const cluster of synonyms) {
+            //console.log("CLUSTER = " + cluster);
+            if (cluster.includes(word)) {
+                result = result.concat(cluster);
+                //console.log("RESULT IS NOW " + result);
+            }
+        }
+    }
+    return removeDuplicates(result);
+}
+
+//  Represents a single findable Location
 class Location {
-    constructor(name, imageUrl, description, context) {
-        this.name = name;
-        this.imageUrl = imageUrl;
-        this.description = description;
-        this.context = 
+    constructor(name, imageUrl, description, context, inheritedKeywords) {
+        this.name = name;               //  "as is" in the JSON
+        this.imageUrl = imageUrl;       //  "as is" in the JSON
+        this.description = description; //  "as is" in the JSON
+        this.context = //   e.g. ["countries", "cities"] or ["beaches"] - i.e. a location category
             context.split('.')
                    .map(c =>
                         {
                             let parts = /^(.+)\[\d+\]$/.exec(c);
                             return (parts == null) ? c : parts[1];
                         });
-
-        console.log('    LOCATION name: ' + this.name);
-        console.log('    LOCATION imageUrl: ' + this.imageUrl);
-        console.log('    LOCATION description: ' + this.description);
-        console.log('    LOCATION context: ' + this.context.toString());
+        this.allKeywords =  //  search for every word must match any one of these
+            removeDuplicates(
+                enrichWithSynonyms(
+                    wordize(name).concat(wordize(description))
+                                 .concat(this.context)
+                                 .concat(inheritedKeywords))
+                    .map(w => w.toLowerCase()));
+ 
+        //console.log('    LOCATION name: ' + this.name);
+        //console.log('    LOCATION imageUrl: ' + this.imageUrl);
+        //console.log('    LOCATION description: ' + this.description);
+        //console.log('    LOCATION context: ' + this.context.toString());
+        //console.log('    LOCATION all keywords: ' + this.allKeywords.toString());
     }
     
+    //  Does this Location "match" a list of the specified search words ?
     match(wordsToSearch) {
-        wordsToSearch = this.removeDuplicates(wordsToSearch);
-        console.log(wordsToSearch);
+        wordsToSearch =
+            removeDuplicates(
+                wordsToSearch.map(w => w.toLowerCase())
+                .filter((item,index) => item.length > 2)); //  don't search for "a" or "of"
+        //console.log("SEARCHING FOR WORDS " + wordsToSearch);
         let wordsMatched = 0;
-        for (let i = 0; i < wordsToSearch.length; i++) {
-            let word = wordsToSearch[i];
-            console.log('word = ' + word);
-            if (this.name.toLowerCase().includes(word.toLowerCase())) {
-                wordsMatched++;
-            } else if (this.description.toLowerCase().includes(word.toLowerCase())) {
-                wordsMatched++;
-            } else if (this.context.includes(word.toLowerCase())) {
+        for (const word of wordsToSearch) {
+            //console.log("SEARCHING FOR WORD " + word);
+            if (this.allKeywords.includes(word.toLowerCase())) {
+                //console.log("MATCHED  WORD " + word);
                 wordsMatched++;
             }
         }
         return wordsMatched == wordsToSearch.length;
     }
-
-    removeDuplicates(arr) {
-        return arr.filter((item, index) => arr.indexOf(item) === index);
-    }
 }
 
+//  Build a list of all known locations
+//  TODO use a Promise/async in a real site!!!
 var locations = [];
 
-function processJsonNode(context, node) {
+function processJsonNode(context, node, inheritedKeywords) {
     //console.log('PROCESSING ' + context);
     if (Array.isArray(node)) {
         //console.log(context + " is array, length = " + node.length);
+        //  Must process every array element, updating "context"
+        //  for each array element accordingly
         for (let i = 0; i < node.length; i++) {
-            processJsonNode(context + '[' + i + ']', node[i]);
+            processJsonNode(context + '[' + i + ']', node[i], inheritedKeywords);
         }
     } else if (typeof(node) == "object") {
         //console.log(context + ' is ' + typeof(json));
-        for (prop in node) {
-            //console.log('property found ' + prop);
-            let propContext = (context.length == 0) ? prop : (context + '.' + prop);
-            processJsonNode(propContext, node[prop]);
-        }
         if (isLocationJsonNode(node)) {
-            console.log('LOCATION FOUND: ' + context);
+            //  This is an object representing a location
+            //console.log('LOCATION FOUND: ' + context);
             let location = new Location(node["name"], 
                                         node["imageUrl"], 
                                         node["description"],
-                                        context);
+                                        context,
+                                        inheritedKeywords);
             locations.push(location);
+        } else {
+            //  Any property of an object can be another object or an array
+            //  of objects, and an actual Location may be some levels beneath.
+            //  If, however, this object has a "name" and/or "description" property,
+            //  words there must become "inherited keywords" for child objects.
+            let inheritedChildKeywords = inheritedKeywords;
+            if ("name" in node) {
+                //  I.e. if a country is 'Ja[an', then every Location therein should
+                //  be findable when searching for 'Japan'.
+                inheritedChildKeywords = 
+                    inheritedChildKeywords.concat(wordize(node["name"]));
+            }
+            if ("description" in node) {
+                //  I.e. if a Country nde has a description "...ragged beauty..."
+                //  then all Locations in this Country should be findable when
+                //  searching for "ragged beauty".
+                inheritedChildKeywords = 
+                    inheritedChildKeywords.concat(wordize(node["description"]));
+            }
+            for (property in node) {
+                //console.log('property found ' + property);
+                let propertyContext = (context.length == 0) ? property : (context + '.' + property);
+                processJsonNode(propertyContext, node[property], inheritedChildKeywords);
+            }
         }
     }
 }
-processJsonNode("", json);
+processJsonNode("", json, []);
 
 console.log(locations);
-console.log(locations[0].match(['sydney', 'countries', 'sydney', 'country']));
+for (const loc of locations) {
+    if (loc.match(['Australia'])) {
+        console.log(loc.name);
+    }
+}
+
