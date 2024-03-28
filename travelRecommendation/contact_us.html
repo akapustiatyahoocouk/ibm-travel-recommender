@@ -35,17 +35,17 @@
                     <p class="PageMessage" style="padding:0;" >
                         Name:
                     </p>
-                    <input type="text" id="ContactUsName" style="padding:0;width:100%;background-color:transparent;color:#FFFFFF;">
+                    <input type="text" id="ContactUsName" style="padding:0;width:100%;background-color:transparent;color:#FFFFFF;" onkeyup="trackSubmitContactRequestButtonState()">
                     
                     <p class="PageMessage" style="padding:0;" >
                         Email:
                     </p>
-                    <input type="text" id="ContactUsEmail" style="padding:0;width:100%;background-color:transparent;color:#FFFFFF;">
+                    <input type="text" id="ContactUsEmail" style="padding:0;width:100%;background-color:transparent;color:#FFFFFF;" onkeyup="trackSubmitContactRequestButtonState()">
 
                     <p class="PageMessage" style="padding:0;" >
                         Message:
                     </p>
-                    <textarea id="ContactUsMessage" rows="5" style="padding:0;width:100%;background-color:transparent;color:#FFFFFF;"></textarea>
+                    <textarea id="ContactUsMessage" rows="5" style="padding:0;width:100%;background-color:transparent;color:#FFFFFF;" onkeyup="trackSubmitContactRequestButtonState()"></textarea>
                     <br>
 
                     <button class="SubmitButton" id="SubmitContactRequestButton" type="submit" onclick="submitContactRequest()">Submit</button>
@@ -54,5 +54,7 @@
         </div>
         
         <script src="travel_recommendation.js"></script>
+        <script labguage="javascript">trackSubmitContactRequestButtonState()</script>
+        
     </body>
 </html>

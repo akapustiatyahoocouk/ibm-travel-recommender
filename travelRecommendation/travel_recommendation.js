@@ -40,15 +40,6 @@ function trackSubmitContactRequestButtonState() {
          contactUsEmail.indexOf('@') != contactUsEmail.lastIndexOf('@') ||
          contactUsMessage.length == 0)? 1 : 0;
 }
-document.getElementById("ContactUsName")
-        .addEventListener("keyup", (event) => { trackSubmitContactRequestButtonState(); });
-document.getElementById("ContactUsEmail")
-        .addEventListener("keyup", (event) => { trackSubmitContactRequestButtonState(); });
-document.getElementById("ContactUsMessage")
-        .addEventListener("keyup", (event) => { trackSubmitContactRequestButtonState(); });
-
-
-onkeyup = trackSubmitContactRequestButtonState();
 
 function submitContactRequest() {
     //  Locate relevant input fields...
@@ -151,9 +142,8 @@ staticJson =
     ]
   }`;
   
-  const json = JSON.parse(staticJson);
-  console.log(json);
-  
+const json = JSON.parse(staticJson);
+console.log(json);
   
 plurals = {
     "beach": "beaches",
@@ -161,3 +151,82 @@ plurals = {
     "city": "cities",
     "temple": "temples",
 };
+
+function isLocationJsonNode(node) {
+    return ("name" in node) &&
+           ("imageUrl" in node) &&
+           ("description" in node);
+}
+
+class Location {
+    constructor(name, imageUrl, description, context) {
+        this.name = name;
+        this.imageUrl = imageUrl;
+        this.description = description;
+        this.context = 
+            context.split('.')
+                   .map(c =>
+                        {
+                            let parts = /^(.+)\[\d+\]$/.exec(c);
+                            return (parts == null) ? c : parts[1];
+                        });
+
+        console.log('    LOCATION name: ' + this.name);
+        console.log('    LOCATION imageUrl: ' + this.imageUrl);
+        console.log('    LOCATION description: ' + this.description);
+        console.log('    LOCATION context: ' + this.context.toString());
+    }
+    
+    match(wordsToSearch) {
+        wordsToSearch = this.removeDuplicates(wordsToSearch);
+        console.log(wordsToSearch);
+        let wordsMatched = 0;
+        for (let i = 0; i < wordsToSearch.length; i++) {
+            let word = wordsToSearch[i];
+            console.log('word = ' + word);
+            if (this.name.toLowerCase().includes(word.toLowerCase())) {
+                wordsMatched++;
+            } else if (this.description.toLowerCase().includes(word.toLowerCase())) {
+                wordsMatched++;
+            } else if (this.context.includes(word.toLowerCase())) {
+                wordsMatched++;
+            }
+        }
+        return wordsMatched == wordsToSearch.length;
+    }
+
+    removeDuplicates(arr) {
+        return arr.filter((item, index) => arr.indexOf(item) === index);
+    }
+}
+
+var locations = [];
+
+function processJsonNode(context, node) {
+    //console.log('PROCESSING ' + context);
+    if (Array.isArray(node)) {
+        //console.log(context + " is array, length = " + node.length);
+        for (let i = 0; i < node.length; i++) {
+            processJsonNode(context + '[' + i + ']', node[i]);
+        }
+    } else if (typeof(node) == "object") {
+        //console.log(context + ' is ' + typeof(json));
+        for (prop in node) {
+            //console.log('property found ' + prop);
+            let propContext = (context.length == 0) ? prop : (context + '.' + prop);
+            processJsonNode(propContext, node[prop]);
+        }
+        if (isLocationJsonNode(node)) {
+            console.log('LOCATION FOUND: ' + context);
+            let location = new Location(node["name"], 
+                                        node["imageUrl"], 
+                                        node["description"],
+                                        context);
+            locations.push(location);
+        }
+    }
+}
+processJsonNode("", json);
+
+console.log(locations);
+console.log(locations[0].match(['sydney', 'countries', 'sydney', 'country']));
