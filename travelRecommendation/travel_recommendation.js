@@ -1,3 +1,5 @@
+//////////
+//  Reusable web page fragments - don't duplicate in every page
 var navDivHtml =
     `<div class="Logo">
         <image class="LogoImage" src="images/logo.png"/>
@@ -8,13 +10,16 @@ var navDivHtml =
         <a class="TopMenu" href="about_us.html#top">About us</a>
         <a class="TopMenu" href="contact_us.html#top">Contact us</a>
     </div>
-    <div class="SearchBar">
-        <form class="SearchForm">
-            <input type="text" id="SearchInput">
-            <button id="SubmitButton" type="submit">Search</button>
-            <button id="ResetButton">Reset</button>
-        </form>
-    </div>`;
+    <div class="SearchBar">`;
+    if (typeof(includeSearchBarInNavBar) != 'undefined' && includeSearchBarInNavBar) {
+        navDivHtml += 
+            `<form class="SearchForm">
+                <input type="text" id="SearchInput" onkeyup="trackSearchButtonState()">
+                <button id="SubmitSearchButton" type="submit" onclick="search()">Search</button>
+                <button id="ResetButton" onclick="resetSearchResults()">Reset</button>
+            </form>`;
+    }
+    navDivHtml += `</div>`;
 document.querySelector( '#home' ).innerHTML = navDivHtml;
     
 var iconAreaHtml =
@@ -23,10 +28,14 @@ var iconAreaHtml =
     </a>`;
 document.querySelector( '#PageIcons' ).innerHTML = iconAreaHtml;
 
+//////////
+//  "About us" page support
 function goToTeamMember(name) {
     alert("Going to team member " + name);
 }
 
+//////////
+//  "Contact us" page support
 function trackSubmitContactRequestButtonState() {
     let contactUsName = document.getElementById("ContactUsName").value.trim();
     let contactUsEmail = document.getElementById("ContactUsEmail").value.trim();
@@ -57,6 +66,9 @@ function submitContactRequest() {
     contactUsMessage.value = "";
 }
 
+
+//////////
+//  Search logic
 
 //  TODO load from JSON file via fetch()!!!
 staticJson =
@@ -151,8 +163,11 @@ synonyms =
     ["city", "cities"],
     ["temple", "temples"]
 ];
+//console.log(synonyms);
 
-//  Breaks phrases into lists of words, suppressing punctuation
+//  Breaks phrases into lists of words, suppressing punctuation (so e.g.
+//  "Sydney, Australia" is broken as ["Sydney", "Australia"].
+//  Lowercasing comes separately if and as required.
 function wordize(phrase) {
     return phrase.replaceAll('.', ' ')
                  .replaceAll(',', ' ')
@@ -167,10 +182,12 @@ function removeDuplicates(arr) {
     return arr.filter((item, index) => arr.indexOf(item) === index);
 }
 
+//  A JSON node is considered to represent a "location:" if it
+//  has a name, a description and a imageUrl, all strings
 function isLocationJsonNode(node) {
     return ("name" in node) && typeof(node["name"] == "string") &&
            ("imageUrl" in node) && typeof(node["imageUrl"] == "string") &&
-           ("description" in node && typeof(node["name"] == "description"));
+           ("description" in node && typeof(node["description"] == "string"));
 }
 
 function enrichWithSynonyms(wordList) {
@@ -288,10 +305,40 @@ function processJsonNode(context, node, inheritedKeywords) {
 }
 processJsonNode("", json, []);
 
+console.log("===== LOADED LOCATIONS =====");
 console.log(locations);
+//  TODO the "for" below is a debug code! kill off when done debugging
 for (const loc of locations) {
     if (loc.match(['Australia'])) {
         console.log(loc.name);
     }
 }
 
+//////////
+//  TODO implement the "book now" logic
+function bookNow() {
+    alert('Book NOW!!!');
+}
+
+//////////
+//  "Search" UI
+
+//  Resets the "search" box and hides all search results
+function resetSearchResults() {
+    document.getElementById("SearchInput").value = "";
+}
+
+//  Enables or disables "Search" button sepending on whether Search//   criteria are empty or noe
+function trackSearchButtonState() {
+    let searchCriteria = document.getElementById("SearchInput").value.trim();
+    let submitButton = document.getElementById("SubmitSearchButton");
+    submitButton.disabled = (searchCriteria.length == 0);
+}
+if (typeof(includeSearchBarInNavBar) != 'undefined' && includeSearchBarInNavBar) {
+    trackSearchButtonState();   //  ...to set up initial Search button state when the page loads
+}
+
+//  Performs the search
+function search() {
+    alert('Searching for ' + document.getElementById("SearchInput").value);
+}
