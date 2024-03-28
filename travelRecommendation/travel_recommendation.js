@@ -16,7 +16,7 @@ var navDivHtml =
             `<form class="SearchForm">
                 <input type="text" id="SearchInput" onkeyup="trackSearchButtonState()">
                 <button id="SubmitSearchButton" type="submit" onclick="search()">Search</button>
-                <button id="ResetButton" onclick="resetSearchResults()">Reset</button>
+                <button id="ResetSearchButton" onclick="resetSearchResults()">Reset</button>
             </form>`;
     }
     navDivHtml += `</div>`;
@@ -80,12 +80,12 @@ staticJson =
         "cities": [
           {
             "name": "Sydney, Australia",
-            "imageUrl": "enter_your_image_for_sydney.jpg",
+            "imageUrl": "./images/locations/sydney.jpg",
             "description": "A vibrant city known for its iconic landmarks like the Sydney Opera House and Sydney Harbour Bridge."
           },
           {
             "name": "Melbourne, Australia",
-            "imageUrl": "enter_your_image_for_melbourne.jpg",
+            "imageUrl": "./images/locations/melbourne.jpg",
             "description": "A cultural hub famous for its art, food, and diverse neighborhoods."
           }
         ]
@@ -96,12 +96,12 @@ staticJson =
         "cities": [
           {
             "name": "Tokyo, Japan",
-            "imageUrl": "enter_your_image_for_tokyo.jpg",
+            "imageUrl": "./images/locations/tokyo.jpg",
             "description": "A bustling metropolis blending tradition and modernity, famous for its cherry blossoms and rich culture."
           },
           {
             "name": "Kyoto, Japan",
-            "imageUrl": "enter_your_image_for_kyoto.jpg",
+            "imageUrl": "./images/locations/kyoto.jpg",
             "description": "Known for its historic temples, gardens, and traditional tea houses."
           }
         ]
@@ -112,12 +112,12 @@ staticJson =
         "cities": [
           {
             "name": "Rio de Janeiro, Brazil",
-            "imageUrl": "enter_your_image_for_rio.jpg",
+            "imageUrl": "./images/locations/rio.jpg",
             "description": "A lively city known for its stunning beaches, vibrant carnival celebrations, and iconic landmarks."
           },
           {
             "name": "São Paulo, Brazil",
-            "imageUrl": "enter_your_image_for_sao-paulo.jpg",
+            "imageUrl": "./images/locations/saopaulo.jpg",
             "description": "The financial hub with diverse culture, arts, and a vibrant nightlife."
           }
         ]
@@ -127,13 +127,13 @@ staticJson =
       {
         "id": 1,
         "name": "Angkor Wat, Cambodia",
-        "imageUrl": "enter_your_image_for_angkor-wat.jpg",
+        "imageUrl": "./images/locations/angkorwat.jpg",
         "description": "A UNESCO World Heritage site and the largest religious monument in the world."
       },
       {
         "id": 2,
         "name": "Taj Mahal, India",
-        "imageUrl": "enter_your_image_for_taj-mahal.jpg",
+        "imageUrl": "./images/locations/tajmahal.jpg",
         "description": "An iconic symbol of love and a masterpiece of Mughal architecture."
       }
     ],
@@ -141,13 +141,13 @@ staticJson =
       {
         "id": 1,
         "name": "Bora Bora, French Polynesia",
-        "imageUrl": "enter_your_image_for_bora-bora.jpg",
+        "imageUrl": "./images/locations/borabora.jpg",
         "description": "An island known for its stunning turquoise waters and luxurious overwater bungalows."
       },
       {
         "id": 2,
         "name": "Copacabana Beach, Brazil",
-        "imageUrl": "enter_your_image_for_copacabana.jpg",
+        "imageUrl": "./images/locations/copacabana.jpg",
         "description": "A famous beach in Rio de Janeiro, Brazil, with a vibrant atmosphere and scenic views."
       }
     ]
@@ -256,6 +256,11 @@ class Location {
 //  TODO use a Promise/async in a real site!!!
 var locations = [];
 
+//  Processes locations JSON, building the list of all searchable Locations.
+//  NOTE that the function definition cannot be moved into the "if (" that
+//  follows it (ES2015 says functions within ifs are not allowed); however,
+//  the function is ONLY invoked when the list of searchable Locations NEEDS
+//  to be populated (i.e. the page presents a Search bar).
 function processJsonNode(context, node, inheritedKeywords) {
     //console.log('PROCESSING ' + context);
     if (Array.isArray(node)) {
@@ -303,7 +308,15 @@ function processJsonNode(context, node, inheritedKeywords) {
         }
     }
 }
-processJsonNode("", json, []);
+if (typeof(includeSearchBarInNavBar) != 'undefined' && includeSearchBarInNavBar) {
+    //  No point in populating the list of available Locations if the page
+    //  has no Search bar. 
+    //  IMPORTANT: In a real-world application the list of available Locations
+    //  will only exist server-side (as it can be HUGE), and search will be
+    //  likewise performed server-side, with only matching Locations returned
+    //  to the client. This will be a candidate for an async request, maybe.
+    processJsonNode("", json, []);
+}
 
 console.log("===== LOADED LOCATIONS =====");
 console.log(locations);
@@ -336,6 +349,7 @@ function trackSearchButtonState() {
 }
 if (typeof(includeSearchBarInNavBar) != 'undefined' && includeSearchBarInNavBar) {
     trackSearchButtonState();   //  ...to set up initial Search button state when the page loads
+    //  TODO when do we disable the "#ResetSearchButton" ?
 }
 
 //  Performs the search
