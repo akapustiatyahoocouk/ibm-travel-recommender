@@ -69,91 +69,27 @@ function submitContactRequest() {
 
 //////////
 //  Search logic
-
-//  TODO load from JSON file via fetch()!!!
-staticJson =
-`{
-    "countries": [
-      {
-        "id": 1,
-        "name": "Australia",
-        "cities": [
-          {
-            "name": "Sydney, Australia",
-            "imageUrl": "./images/locations/sydney.jpg",
-            "description": "A vibrant city known for its iconic landmarks like the Sydney Opera House and Sydney Harbour Bridge."
-          },
-          {
-            "name": "Melbourne, Australia",
-            "imageUrl": "./images/locations/melbourne.jpg",
-            "description": "A cultural hub famous for its art, food, and diverse neighborhoods."
-          }
-        ]
-      },
-      {
-        "id": 2,
-        "name": "Japan",
-        "cities": [
-          {
-            "name": "Tokyo, Japan",
-            "imageUrl": "./images/locations/tokyo.jpg",
-            "description": "A bustling metropolis blending tradition and modernity, famous for its cherry blossoms and rich culture."
-          },
-          {
-            "name": "Kyoto, Japan",
-            "imageUrl": "./images/locations/kyoto.jpg",
-            "description": "Known for its historic temples, gardens, and traditional tea houses."
-          }
-        ]
-      },
-      {
-        "id": 3,
-        "name": "Brazil",
-        "cities": [
-          {
-            "name": "Rio de Janeiro, Brazil",
-            "imageUrl": "./images/locations/rio.jpg",
-            "description": "A lively city known for its stunning beaches, vibrant carnival celebrations, and iconic landmarks."
-          },
-          {
-            "name": "São Paulo, Brazil",
-            "imageUrl": "./images/locations/saopaulo.jpg",
-            "description": "The financial hub with diverse culture, arts, and a vibrant nightlife."
-          }
-        ]
-      }
-    ],
-    "temples": [
-      {
-        "id": 1,
-        "name": "Angkor Wat, Cambodia",
-        "imageUrl": "./images/locations/angkorwat.jpg",
-        "description": "A UNESCO World Heritage site and the largest religious monument in the world."
-      },
-      {
-        "id": 2,
-        "name": "Taj Mahal, India",
-        "imageUrl": "./images/locations/tajmahal.jpg",
-        "description": "An iconic symbol of love and a masterpiece of Mughal architecture."
-      }
-    ],
-    "beaches": [
-      {
-        "id": 1,
-        "name": "Bora Bora, French Polynesia",
-        "imageUrl": "./images/locations/borabora.jpg",
-        "description": "An island known for its stunning turquoise waters and luxurious overwater bungalows."
-      },
-      {
-        "id": 2,
-        "name": "Copacabana Beach, Brazil",
-        "imageUrl": "./images/locations/copacabana.jpg",
-        "description": "A famous beach in Rio de Janeiro, Brazil, with a vibrant atmosphere and scenic views."
-      }
-    ]
-  }`;
-const json = JSON.parse(staticJson);
-//console.log(json);
+var locations = [];
+var json;
+fetch('./travel_recommendation_api.json')
+   .then(response => 
+            { 
+                if (!response.ok) {
+                    alert("HTTP error " + response.status);
+                }
+                const js = response.json();
+                //console.log(js); 
+                return js;
+            })
+   .then(js => 
+            {
+                //console.log('JSON:' + js);
+                processJsonNode("", js, []);
+                //console.log('LOCATIONS:' + locations);
+                //console.log(js); 
+                //json = js;
+                //return js;
+            });
   
 //  TODO load from JSON file via fetch()!!!
 synonyms =
@@ -227,7 +163,7 @@ class Location {
                                  .concat(inheritedKeywords))
                     .map(w => w.toLowerCase()));
  
-        console.log('    LOCATION id: ' + this.id);
+        //console.log('    LOCATION id: ' + this.id);
         //console.log('    LOCATION name: ' + this.name);
         //console.log('    LOCATION imageUrl: ' + this.imageUrl);
         //console.log('    LOCATION description: ' + this.description);
@@ -255,8 +191,6 @@ class Location {
 }
 
 //  Build a list of all known locations
-//  TODO use a Promise/async in a real site!!!
-var locations = [];
 
 //  Processes locations JSON, building the list of all searchable Locations.
 //  NOTE that the function definition cannot be moved into the "if (" that
@@ -318,16 +252,7 @@ if (typeof(includeSearchBarInNavBar) != 'undefined' && includeSearchBarInNavBar)
     //  will only exist server-side (as it can be HUGE), and search will be
     //  likewise performed server-side, with only matching Locations returned
     //  to the client. This will be a candidate for an async request, maybe.
-    processJsonNode("", json, []);
-}
-
-console.log("===== LOADED LOCATIONS =====");
-console.log(locations);
-//  TODO the "for" below is a debug code! kill off when done debugging
-for (const loc of locations) {
-    if (loc.match(['Australia'])) {
-        console.log(loc.name);
-    }
+    //processJsonNode("", json, []);
 }
 
 //////////
@@ -343,7 +268,6 @@ function bookNow() {
 function resetSearchResults() {
     document.getElementById("SearchInput").value = "";
     document.getElementById("RecommendedLocations").innerHTML = "";
-    
 }
 
 //  Enables or disables "Search" button sepending on whether Search//   criteria are empty or noe
@@ -359,7 +283,32 @@ if (typeof(includeSearchBarInNavBar) != 'undefined' && includeSearchBarInNavBar)
 
 //  Performs the search
 function search() {
-    alert('Searching for ' + document.getElementById("SearchInput").value);
+    let searchCriteria =
+        wordize(document.getElementById("SearchInput").value)
+            .map(w => w.toLowerCase());
+    //alert('Searching for ' + searchCriteria);
+    
+    resultHtml = "";
+    for (const loc of locations) {
+        if (loc.match(searchCriteria)) {
+            resultHtml +=
+                `<div class="RecommendedLocation">
+                    <div>
+                        <image src="${loc.imageUrl}" class="RecommendedLocationImage"/><br>
+                    </div>
+                    <div class="RecommendedLocationName">
+                       ${loc.name}
+                    </div>
+                    <div class="RecommendedLocationDescription">
+                        ${loc.description}
+                    </div>
+                    <div class="RecommendedLocationButtons">
+                        <button class="PageButton" onclick="visitLocation(${loc.id})">Visit</button>
+                    </div>
+                </div>`;
+        }
+    }
+    document.getElementById("RecommendedLocations").innerHTML = resultHtml;
 }
 
 //  TODO implement the "visit location" logic
