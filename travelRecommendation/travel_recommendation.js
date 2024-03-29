@@ -226,6 +226,7 @@ function processJsonNode(context, node, inheritedKeywords) {
 }
 
 var locations = [];
+document.getElementById("SearchInput").disabled = true;
 fetch('./travel_recommendation_api.json')
    .then(response => 
             { 
@@ -248,6 +249,7 @@ fetch('./travel_recommendation_api.json')
    .then(js => 
             {
                 console.log('DONE FETCHING JSON:' + js);
+                document.getElementById("SearchInput").disabled = false;
                 return js;
             });
 
