@@ -69,8 +69,11 @@ function submitContactRequest() {
 
 //////////
 //  Search logic
+function delay(time) {
+  return new Promise(resolve => setTimeout(resolve, time));
+}
 var locations = [];
-var json;
+var jsonReady = false;
 fetch('./travel_recommendation_api.json')
    .then(response => 
             { 
@@ -88,8 +91,15 @@ fetch('./travel_recommendation_api.json')
                 //console.log('LOCATIONS:' + locations);
                 //console.log(js); 
                 //json = js;
-                //return js;
-            });
+                return js;
+            })
+   .then(js => 
+           {
+                jsonReady = true;
+           });
+while (!jsonReady) {
+    delay(1000).then(() => console.log('ran after 1 second1 passed'));
+}
   
 //  TODO load from JSON file via fetch()!!!
 synonyms =
