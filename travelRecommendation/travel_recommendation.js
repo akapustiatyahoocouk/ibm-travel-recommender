@@ -15,7 +15,7 @@ var navDivHtml =
         navDivHtml += 
             `<form class="SearchForm">
                 <input type="search" id="SearchInput" onkeyup="trackSearchButtonState()">
-                <button id="SubmitSearchButton" type="submit" onclick="search()">Search</button>
+                <button id="SubmitSearchButton" onclick="search()">Search</button>
                 <button id="ResetSearchButton" onclick="resetSearchResults()">Reset</button>
             </form>`;
     }
