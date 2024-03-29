@@ -20,22 +20,58 @@
 
         <!-- Page body  area -->
         <div class="PageMessageArea">
-            <div class="PageCaption" style="padding-top: 2cm;">
-                Explore<br>
-                Dream<br>
-                Destinations<br>
-            </div>
+            <div style="width: 50%;float:left;">
+                <div class="PageCaption" style="padding-top: 2cm;">
+                    Explore<br>
+                    Dream<br>
+                    Destinations<br>
+                </div>
 
-            <div class="PageMessage" style="width: 50%;">
-                It encourages exploration of unfamiliar
-                territories, embracing diverse cultures and
-                landscapes, while pursuing the desired
-                destination that captivates the heart and
-                ignites a sense of wonder.<br>
-            </div>
+                <div class="PageMessage">
+                    It encourages exploration of unfamiliar
+                    territories, embracing diverse cultures and
+                    landscapes, while pursuing the desired
+                    destination that captivates the heart and
+                    ignites a sense of wonder.<br>
+                </div>
 
-            <div class="PageButtons">
-                <button id="BookNowButton" class="PageButton" onclick="bookNow()">Book now</button>
+                <div class="PageButtons">
+                    <button id="BookNowButton" class="PageButton" onclick="bookNow()">Book now</button>
+                </div>
+            </div>
+            
+            <div class="RecommendedLocations" id="RecommendedLocations">
+                <div class="RecommendedLocation">
+                    <div>
+                        <image src="images/locations/rio.jpg" style="width:100%;"/><br>
+                    </div>
+                    <div class="RecommendedLocationName">
+                       123
+                    </div>
+                    <div class="RecommendedLocationDescription">
+                        456 456 456 456 456 456 456 456 456 456 456 456 456 456 
+                        456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 
+                    </div>
+                    <div class="RecommendedLocationButtons">
+                        <button class="PageButton" onclick="visitLocation(2)">Visit</button>
+                    </div>
+                </div>
+                <div class="RecommendedLocation">
+                    <div>
+                        <image src="images/locations/rio.jpg" style="width:100%;"/><br>
+                    </div>
+                    <div class="RecommendedLocationName">
+                       123
+                    </div>
+                    <div class="RecommendedLocationDescription">
+                        456 456 456 456 456 456 456 456 456 456 456 456 456 456 
+                        456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 
+                        456 456 456 456 456 456 456 456 456 456 456 456 456 456 456 
+                    </div>
+                    <div class="RecommendedLocationButtons">
+                        <button class="PageButton" onclick="visitLocation(3)">Visit</button>
+                    </div>
+                </div>
             </div>
         </div>
         <script language="javascript">const includeSearchBarInNavBar = true;</script>

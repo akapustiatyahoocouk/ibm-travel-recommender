@@ -14,7 +14,7 @@ var navDivHtml =
     if (typeof(includeSearchBarInNavBar) != 'undefined' && includeSearchBarInNavBar) {
         navDivHtml += 
             `<form class="SearchForm">
-                <input type="text" id="SearchInput" onkeyup="trackSearchButtonState()">
+                <input type="search" id="SearchInput" onkeyup="trackSearchButtonState()">
                 <button id="SubmitSearchButton" type="submit" onclick="search()">Search</button>
                 <button id="ResetSearchButton" onclick="resetSearchResults()">Reset</button>
             </form>`;
@@ -207,7 +207,8 @@ function enrichWithSynonyms(wordList) {
 
 //  Represents a single findable Location
 class Location {
-    constructor(name, imageUrl, description, context, inheritedKeywords) {
+    constructor(id, name, imageUrl, description, context, inheritedKeywords) {
+        this.id = id;
         this.name = name;               //  "as is" in the JSON
         this.imageUrl = imageUrl;       //  "as is" in the JSON
         this.description = description; //  "as is" in the JSON
@@ -226,6 +227,7 @@ class Location {
                                  .concat(inheritedKeywords))
                     .map(w => w.toLowerCase()));
  
+        console.log('    LOCATION id: ' + this.id);
         //console.log('    LOCATION name: ' + this.name);
         //console.log('    LOCATION imageUrl: ' + this.imageUrl);
         //console.log('    LOCATION description: ' + this.description);
@@ -275,7 +277,8 @@ function processJsonNode(context, node, inheritedKeywords) {
         if (isLocationJsonNode(node)) {
             //  This is an object representing a location
             //console.log('LOCATION FOUND: ' + context);
-            let location = new Location(node["name"], 
+            let location = new Location(locations.length + 1,
+                                        node["name"], 
                                         node["imageUrl"], 
                                         node["description"],
                                         context,
@@ -339,6 +342,8 @@ function bookNow() {
 //  Resets the "search" box and hides all search results
 function resetSearchResults() {
     document.getElementById("SearchInput").value = "";
+    document.getElementById("RecommendedLocations").innerHTML = "";
+    
 }
 
 //  Enables or disables "Search" button sepending on whether Search//   criteria are empty or noe
@@ -355,4 +360,12 @@ if (typeof(includeSearchBarInNavBar) != 'undefined' && includeSearchBarInNavBar)
 //  Performs the search
 function search() {
     alert('Searching for ' + document.getElementById("SearchInput").value);
+}
+
+//  TODO implement the "visit location" logic
+function visitLocation(locationId) {
+    loc = locations.filter((item,index) => item.id == locationId);
+    alert('Visit location ' + 
+          locationId +
+          ": " + loc[0].name);
 }

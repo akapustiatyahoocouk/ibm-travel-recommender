@@ -118,9 +118,10 @@ body {
 
 .PageButton {
     background-color:  #00C000;
-    border-color: #FF00FF;
+    border-color: #80C0C0;
     border-width: 2px;
-    border-radius: 15px;
+    border-radius: 7px;
+    padding: 2px 10px;
 }
 
 .TeamMembers {
@@ -221,4 +222,36 @@ body {
 .SubmitButton:disabled {
     color: gray;
     cursor: pointer;
+}
+
+/*  Search results */
+.RecommendedLocations {
+    width: 25%;
+    float: right;
+    //background-color: red;
+}
+
+.RecommendedLocation {
+    background-color: white;
+    margin: 0px 0px 5px 0px;
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.RecommendedLocationName {
+    font-size: 20px;
+    font-weight: bold;
+    padding:5px 10px;
+}
+
+.RecommendedLocationDescription {
+    padding: 5px 10px;
+    word-break: break-all; 
+    word-wrap: break-word;
+    font-size: 12px;
+    color:#808080;
+}
+
+.RecommendedLocationButtons {
+    padding:5px 10px;
 }
