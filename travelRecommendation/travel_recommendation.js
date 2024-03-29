@@ -97,6 +97,7 @@ fetch('./travel_recommendation_api.json')
            {
                 jsonReady = true;
            });
+console.out('Beginning to wait...');
 while (!jsonReady) {
     delay(1000).then(() => console.log('ran after 1 second1 passed'));
 }
