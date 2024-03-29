@@ -244,8 +244,12 @@ fetch('./travel_recommendation_api.json')
                 //console.log(js); 
                 //json = js;
                 return js;
+            })
+   .then(js => 
+            {
+                console.log('DONE FETCHING JSON:' + js);
+                return js;
             });
-
 
 //////////
 //  TODO implement the "book now" logic
