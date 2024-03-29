@@ -72,36 +72,7 @@ function submitContactRequest() {
 function delay(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
-var locations = [];
-var jsonReady = false;
-fetch('./travel_recommendation_api.json')
-   .then(response => 
-            { 
-                if (!response.ok) {
-                    alert("HTTP error " + response.status);
-                }
-                const js = response.json();
-                //console.log(js); 
-                return js;
-            })
-   .then(js => 
-            {
-                //console.log('JSON:' + js);
-                processJsonNode("", js, []);
-                //console.log('LOCATIONS:' + locations);
-                //console.log(js); 
-                //json = js;
-                return js;
-            })
-   .then(js => 
-           {
-                jsonReady = true;
-           });
-console.out('Beginning to wait...');
-while (!jsonReady) {
-    delay(1000).then(() => console.log('ran after 1 second1 passed'));
-}
-  
+
 //  TODO load from JSON file via fetch()!!!
 synonyms =
 [   //  An array of "synonym clusters"
@@ -256,15 +227,37 @@ function processJsonNode(context, node, inheritedKeywords) {
         }
     }
 }
-if (typeof(includeSearchBarInNavBar) != 'undefined' && includeSearchBarInNavBar) {
-    //  No point in populating the list of available Locations if the page
-    //  has no Search bar. 
-    //  IMPORTANT: In a real-world application the list of available Locations
-    //  will only exist server-side (as it can be HUGE), and search will be
-    //  likewise performed server-side, with only matching Locations returned
-    //  to the client. This will be a candidate for an async request, maybe.
-    //processJsonNode("", json, []);
+
+var locations = [];
+var jsonReady = false;
+fetch('./travel_recommendation_api.json')
+   .then(response => 
+            { 
+                if (!response.ok) {
+                    alert("HTTP error " + response.status);
+                }
+                const js = response.json();
+                //console.log(js); 
+                return js;
+            })
+   .then(js => 
+            {
+                //console.log('JSON:' + js);
+                processJsonNode("", js, []);
+                //console.log('LOCATIONS:' + locations);
+                //console.log(js); 
+                //json = js;
+                return js;
+            })
+   .then(js => 
+           {
+                jsonReady = true;
+           });
+console.log('Beginning to wait...');
+while (!jsonReady) {
+    delay(1000).then(() => console.log('ran after 1 second1 passed'));
 }
+
 
 //////////
 //  TODO implement the "book now" logic
