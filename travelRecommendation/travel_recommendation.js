@@ -69,9 +69,6 @@ function submitContactRequest() {
 
 //////////
 //  Search logic
-function delay(time) {
-  return new Promise(resolve => setTimeout(resolve, time));
-}
 
 //  TODO load from JSON file via fetch()!!!
 synonyms =
@@ -229,7 +226,6 @@ function processJsonNode(context, node, inheritedKeywords) {
 }
 
 var locations = [];
-var jsonReady = false;
 fetch('./travel_recommendation_api.json')
    .then(response => 
             { 
@@ -242,23 +238,13 @@ fetch('./travel_recommendation_api.json')
             })
    .then(js => 
             {
-                //console.log('JSON:' + js);
+                console.log('JSON:' + js);
                 processJsonNode("", js, []);
-                //console.log('LOCATIONS:' + locations);
+                console.log('LOCATIONS:' + locations);
                 //console.log(js); 
                 //json = js;
                 return js;
-            })
-   .then(js => 
-           {
-                console.log('setting jsonReady to true');
-                jsonReady = true;
-           });
-console.log('Beginning to wait...');
-while (!jsonReady) {
-    console.log('jsonReady is ' + jsonReady);
-    delay(1000).then(() => console.log('ran after 1 second1 passed'));
-}
+            });
 
 
 //////////
